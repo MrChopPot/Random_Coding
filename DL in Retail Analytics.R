@@ -1,5 +1,5 @@
 # Install required packages for neural network
-install.packages(c("RCurl","nnet","scales","Ecdat"))
+#install.packages(c("RCurl","nnet","scales","Ecdat"))
 
 # Additional preparation for multi-layer neural network
 #cran <- getOption("repos")
@@ -7,15 +7,13 @@ install.packages(c("RCurl","nnet","scales","Ecdat"))
 #options(repos = cran)
 #install.packages("mxnet")
 
-
 # Clear the environment if remaining
 rm(list=ls())
 
 # Set working directory
-#setwd("C:/Users/mnishid2/Googledrive2/teaching/2018_9/Retail analytics/Inclass_R_exercise/session6")
+#setwd("xxx")
 
 ### Use a set of relevant library
-
 library(Ecdat)
 library(nnet)
 library(scales)
@@ -55,7 +53,6 @@ cat(paste(
 
 # Import function to display fitted network structure
 library(RCurl)
-
 root.url<-'https://gist.githubusercontent.com/fawda123'
 raw.fun<-paste(
   root.url,
@@ -96,7 +93,6 @@ cat(paste(
 # Display fitted network structure
 par(mar=numeric(4),mfrow=c(1,2),family='serif')
 plot(n.net2,nid=F)
-
 
 
 ### 3-1 Multi-layer Neural network with  hidden variables
