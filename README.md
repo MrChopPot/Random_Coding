@@ -5,3 +5,5 @@
 2. Deep Learning in R
 
 3. Web Scraping from NBA.com using Python (selenium & beautifulsoap)
+
+4. Using SQL to make reports (Datacamp.com)
