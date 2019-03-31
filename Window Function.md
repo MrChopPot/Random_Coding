@@ -1,5 +1,7 @@
 ## Window Function
 
+Credit to Youtube vedio: [Window Function Tutorial](https://www.youtube.com/watch?v=H6OTMoXjNiM&list=PLgR-BOYibnN0QqIPFbMlS01bw8x9g07Ll)
+
 1. ... OVER(PARTITION BY XXX [ORDER BY YYY ASC/DESC]) AS ...
 
    ~~~SQL
