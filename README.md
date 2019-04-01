@@ -7,3 +7,5 @@
 3. Web Scraping from NBA.com using Python (selenium & beautifulsoap)
 
 4. Using SQL to make reports (Datacamp.com)
+
+5. Window Functions in SQL (Youtube.com)
