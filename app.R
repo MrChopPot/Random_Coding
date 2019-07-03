@@ -26,13 +26,12 @@ header <- dashboardHeader(
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("About", tabName = "myTabForIntroduction", icon = icon("fa fa-compass")),
+    menuItem("About", tabName = "myTabForIntroduction", icon = icon("fas fa-book")),
     menuItem("Salary Scatter Plot", tabName = "myTabForScatterPlot", icon = icon("bar-chart-o")),
     menuItem("Salary Comparison Map", tabName = "myTabForGvisMap", icon = icon("fas fa-map-marked-alt")),
     menuItem("Salary Data Explorer", tabName = "myTabForDataTable", icon = icon("far fa-eye")),   
     menuItem("Top Recruiters", tabName = "myTabForRecruitRanking", icon = icon("fas fa-highlighter")),
-    menuItem("External Info", tabName = "myTabForExternalInfo", icon = icon("fas fa-book")),
-    menuItem("Visit Me", icon = icon("send", lib='glyphicon'), href = "https://github.com/MrChopPot/Random_Coding/blob/master/app.R")
+    menuItem("Visit Me (to Github)", icon = icon("send", lib='glyphicon'), href = "https://github.com/MrChopPot/Random_Coding/blob/master/app.R")
   )
 ) 
 
@@ -211,7 +210,7 @@ body <- dashboardBody(
               )
             )
     ),
-    # 4th: Data
+    # 4th: Data Explorer
     tabItem("myTabForDataTable",
             h2("Sarary Data Explorer"),
             fluidRow(
@@ -257,12 +256,12 @@ body <- dashboardBody(
                                  min = 0, max = 400000, value = c(40000, 200000), step = 5000)
               )
             ),
-            
             fluidRow(
               column(6, textInput("searchInputForCity","City Search:","") ),
-              column(6, textInput("searchInputForEmployer","Employer Name Search:",""))
+              column(6, textInput("searchInputForEmployer","Employer Name Search:","")),
+              downloadButton("downloadData", "Download")
             ),
-            fluidRow(br()),
+            br(),
             fluidRow(
               DT::dataTableOutput("myTable")
             )
@@ -309,33 +308,6 @@ body <- dashboardBody(
                 ),
                 DT::dataTableOutput("myTableForOverallRank")
               )
-    ),
-    # 6th: External Info
-    tabItem("myTabForExternalInfo",
-            h2("External sources"),
-            fluidRow(
-              box(
-                title = "How to use (Toggle the + button)", solidHeader = TRUE,
-                status="warning", width=12, collapsible = TRUE, collapsed = TRUE,
-                h5("This External Resources panel shows a collection of valuable and meaningful information from external sources. The external resources are embedded or regenerated for better readibility and interactivity. (All sources and author names of the external resources are included)")
-              )
-            ),
-            fluidRow(
-              box(
-                title = "Top Recruiter rank (by Data Science Central)", solidHeader = TRUE,
-                tags$div(
-                  "Source from ",
-                  tags$span(      
-                    tags$a(href="http://www.datasciencecentral.com/profiles/blogs/7500-companies-hiring-data-scientists", "7500 companies hiring data scientists"),
-                    "by Vincent Granville on January 26, 2015, Data Science Centeral",
-                    tags$br(),
-                    tags$br()
-                  )
-                ),
-                status="info", collapsible = TRUE, width=12, 
-                DT::dataTableOutput("myTableForExternalLinkDSC")
-              )
-            )
     )
   )
 )
@@ -557,8 +529,16 @@ server <- function(input, output) {
           "$(this.api().table().header()).css({'background-color': '#cce6ff', 'color': '#2a4e6c'});",
           "}")
     ) 
-  ) %>% formatCurrency(c('WAGE_YEARLY'), "$") ) 
+  ) %>% formatCurrency(c('WAGE_YEARLY'), "$"))
   
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("shiny", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(updateInputDataForDTable(), file, row.names = FALSE)
+    }
+  )
   
   #////////////////////////////////////////////////////////////////////////////////
   # googleVis Map 
@@ -569,7 +549,7 @@ server <- function(input, output) {
     gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="AVG_SALARY",
                  options=list(region="US", displayMode="regions", resolution="provinces", 
                               width="100%", #height=200, 
-                              colorAxis="{colors:['#36648b', '#9a162c']}",
+                              colorAxis="{colors:['#43C6AC', '#191654']}",
                               backgroundColor="gray"
                  )
     )
@@ -581,7 +561,7 @@ server <- function(input, output) {
     gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="AVG_SALARY",
                  options=list(region="US", displayMode="regions", resolution="provinces", 
                               width="100%",
-                              colorAxis="{colors:['#5adbf2', '#fe9128']}",
+                              colorAxis="{colors:['#F0F2F0', '#000C40']}",
                               backgroundColor="gray"
                  )
     )
@@ -715,27 +695,6 @@ server <- function(input, output) {
       theme(legend.position="none", plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
       coord_flip()
   })
-  
-  ###########################################################
-  # DataTables for External Links
-  ###########################################################
-  output$myTableForExternalLinkDSC <- DT::renderDataTable(DT::datatable({ 
-      colnames(externalData)[3] <- "Number"
-      dataForExternalLinkDSC <- externalData[,-4]
-      dataForExternalLinkDSC
-      
-  }, rownames = F, extensions = c('ColReorder','Scroller'), options = list(
-    deferRender = TRUE,  
-    searching = T,
-    dom = 'RC<"clear">lfrtip',
-    buttons = I('colvis'),
-    lengthMenu = list(c(5, 10, 15, 25, 25, 50, 100), c('5', '10', '15', '20', '25','50','100')),
-    pageLength =  10,
-    initComplete = JS(
-      "function(settings, json) {",
-      "$(this.api().table().header()).css({'background-color': '#cce6ff', 'color': '#2a4e6c'});",
-      "}")
-  ))) 
 }
 
 
