@@ -106,16 +106,10 @@ body <- dashboardBody(
             h2("Salary Data Scatter Plot"),
             fluidRow(
               box(
-                title = "How to use (Toggle the + button)", solidHeader = TRUE,
+                title = "How to Use", solidHeader = TRUE,
                 status="warning", width=12, collapsible = TRUE, collapsed = TRUE,
                 h4("* Please be patient that it usually takes 10 seconds to load the scatter plot"),
-                h5("This 'Salary Scatter Plot' panel shows the salary distribution by 8 different jobs. It comprises of three sections: an option input section, a plot area section, and an aggreate summary box section."),
-                h5("The plot area basically shows two types of visualizations: a scatter plot showing all the salary data by 8 professions, 
-                   and a box plot showing values of minimum, 25 percent quintile, median, 75 percent quintile, and maximum. 
-                   Users can toggle the 'showing data points' option above the plot so that they can only see the boxplot alone. 
-                   Users also can interactively change the options of the target states (All or one state among 50), and target salary range. Corresponding changes are updated on the plot area and the aggregate summary boxes as soon as users made any change."),
-                h5("Salary data of assistant professor are in red color, attroney salary are in orange color, business analyst salary are in light green color, 
-                   data analyst salary are in green color, data scientist salary are in teal color , management consultant salary are in turkey blue color, software engineer salary are in purple and teacher salary are in red violet color. ")
+                h5("This 'Salary Scatter Plot' panel shows the salary distribution by 8 different jobs. It comprises of three sections: an option input section, a plot area section, and an aggreate summary box section.")
               )
             ),
            fluidRow(
@@ -160,10 +154,9 @@ body <- dashboardBody(
             h2("Salary Comparison Map"),
             fluidRow(
               box(
-                title = "How to use (Toggle the + button)", solidHeader = TRUE,
+                title = "How to Use", solidHeader = TRUE,
                 status="warning", width=12, collapsible = TRUE, collapsed = TRUE,
-                h5("The Salary Comparison Map provides a way to compare salary distribution of two professions in the United States. You can choose two professions (job titles), then the distribution map and data table will show the updated result. You can also sort the results in the table by state, average salary and the number of jobs."),
-                h5("Note that when the panel is initialized, all the data which is not filtered yet by state, profession, average salary and the number of jobs.")
+                h5("The Salary Comparison Map provides a way to compare salary distribution of two professions in the United States. You can choose two professions (job titles), then the distribution map and data table will show the updated result. You can also sort the results in the table by state, average salary and the number of jobs.")
               )
             ),
             fluidRow(
@@ -215,10 +208,10 @@ body <- dashboardBody(
             h2("Sarary Data Explorer"),
             fluidRow(
               box(
-                title = "How to use (Toggle the + button)", solidHeader = TRUE,
+                title = "How to Use", solidHeader = TRUE,
                 status="warning", width=12, collapsible = TRUE, collapsed = TRUE,
                 h5("This 'Salary Data Explorer' is a data table having features of filtering, paginating, searching, and sorting to explore the data of your interests. 
-                   You can interactively choose the options, then the table shows updated result. The data of the table can be filtered by profession (multiple choices), state, salary range, and name (of city and employer)")
+                   You can interactively choose the options, then the table shows updated result. The data of the table can be filtered by profession (multiple choices), state, salary range, and name (of city and employer).")
               )
             ),
             fluidRow(
@@ -257,9 +250,9 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              column(6, textInput("searchInputForCity","City Search:","") ),
-              column(6, textInput("searchInputForEmployer","Employer Name Search:","")),
-              downloadButton("downloadData", "Download")
+              column(5, textInput("searchInputForCity","City Search:","") ),
+              column(5, textInput("searchInputForEmployer","Employer Name Search:","")),
+              column(2, br(), downloadButton("downloadData", "Download"))
             ),
             br(),
             fluidRow(
@@ -271,11 +264,9 @@ body <- dashboardBody(
             h2("Top Recruiters"),
             fluidRow(
               box(
-                title = "How to use (Toggle the + button)", solidHeader = TRUE,
+                title = "How to Use", solidHeader = TRUE,
                 status = "warning", width = 12, collapsible = TRUE, collapsed = TRUE,
-                h5("The Top Recruiter Tables panel comprises of 5 salary data tables showing who the top recruiters are for each profession. Each table contains employer names, the number of jobs, average salary, the minimum salary, the 25% quantile salary, median salary, the 75% quantile salary, and the maximum salary. "),
-                h5("The first table intentionally shows the salary data without distinguishing the profession to provide an overall idea who the top recruiters are regardless of a profession across the United States. "),
-                h5("However, other four remaining tables provide summary tables filtering options by states and specific professions: data scientist, software engineer, data analyst, and other professions. (The tables are sorted by the number of jobs and the average salary in descending order.")
+                h5("The Top Recruiter Tables panel comprises of 5 salary data tables showing who the top recruiters are for each profession. Each table contains employer names, the number of jobs, average salary, the minimum salary, the 25% quantile salary, median salary, the 75% quantile salary, and the maximum salary. ")
               )
             ),
             br(),
@@ -621,21 +612,21 @@ server <- function(input, output) {
     dataForScatterPlot <- updateInputDataForScatterPlot()
     
     if(input$checkboxForShowDataPoint == T){
-      ggplot(data = dataForScatterPlot, aes(x = JOB_TITLE_SUBGROUP, y = PAID_WAGE_PER_YEAR, color = JOB_TITLE_SUBGROUP)) + 
+      ggplot(data = dataForScatterPlot, aes(x = JOB_TITLE_SUBGROUP, y = PAID_WAGE_PER_YEAR/1000, color = JOB_TITLE_SUBGROUP)) + 
         geom_boxplot() +
         ggtitle("Salary VS. Jobs") +
         geom_jitter(position=position_jitter(width=.9), size=1, alpha=.3) +
-        theme(legend.position="bottom", legend.title = element_blank(), plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
+        theme(legend.position="bottom", legend.title = element_blank(), plot.title = element_text(size=18, face="bold", hjust = 0.5), axis.text = element_text(size = 12), axis.title=element_text(size=15)) +
         xlab("Job Title") +
-        ylab("Paid Wage Per Year ($)") +
+        ylab("Paid Wage Per Year ($ K)") +
         labs(fill = "")
     } else {
-      ggplot(data = dataForScatterPlot, aes(x = JOB_TITLE_SUBGROUP, y = PAID_WAGE_PER_YEAR, color = JOB_TITLE_SUBGROUP)) +
+      ggplot(data = dataForScatterPlot, aes(x = JOB_TITLE_SUBGROUP, y = PAID_WAGE_PER_YEAR/1000, color = JOB_TITLE_SUBGROUP)) +
         geom_boxplot() +
         ggtitle("Salary VS. Jobs") +
-        theme(legend.position="bottom", legend.title = element_blank(), plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
+        theme(legend.position="bottom", legend.title = element_blank(), plot.title = element_text(size=15, face="bold", hjust = 0.5), axis.text = element_text(size = 12), axis.title=element_text(size=15)) +
         xlab("Job Title") +
-        ylab("Paid Wage Per Year ($)") +
+        ylab("Paid Wage Per Year ($ K)") +
         labs(fill = "")
     }
   })
@@ -687,12 +678,12 @@ server <- function(input, output) {
     
     dataForDTableOverallPlot <- dataForDTableOverall
     
-    ggplot(data = dataForDTableOverallPlot[1:10,], aes(x = reorder(EMPLOYER_NAME, Median), y = Median, fill = EMPLOYER_NAME)) +
-      geom_col() +
+    ggplot(data = dataForDTableOverallPlot[1:10,], aes(x = reorder(EMPLOYER_NAME, Median), y = Median/1000, fill = EMPLOYER_NAME)) +
+      geom_col(alpha = 0.7) +
       ggtitle("Top 10 Companies") +
       xlab("Company Name") +
-      ylab("Median Wage") +
-      theme(legend.position="none", plot.title = element_text(size=15, face="bold", hjust = 0.5)) +
+      ylab("Median Wage ($ K)") +
+      theme(legend.position="none", plot.title = element_text(size=15, face="bold", hjust = 0.5), axis.text.x = element_text(size = 12), axis.title=element_text(size=15)) +
       coord_flip()
   })
 }
