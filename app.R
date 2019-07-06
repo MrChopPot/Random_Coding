@@ -10,6 +10,7 @@ load('Salary.RData')
 
 library(dplyr)
 library(ggplot2)
+library(plotly)
 library(googleVis)
 library(ggvis)
 library(shiny)
@@ -21,7 +22,7 @@ Sys.setlocale('LC_ALL','C') # turn off locale-specific sorting
 options(shiny.trace = F) # don't print any message
 
 header <- dashboardHeader(
-  title = tags$strong("Salary Explorer")
+  title = tags$strong("Offershow.com")
 )
 
 sidebar <- dashboardSidebar(
@@ -45,22 +46,16 @@ body <- dashboardBody(
                 status = "success", width = 12, collapsible = TRUE,
                 column(12, 
                   tags$div(
-                    "This app,",
-                    tags$span(tags$strong("U.S. Salary Comparator,"), 
-                      "is the shiny dashboard application designed to explore and compare salary data among", tags$strong("8"), "professions, including:",
-                      tags$li("Data Scientist"), 
-                      tags$li("Software Engineer"), 
-                      tags$li("Data Analyst"), 
-                      tags$li("Business Analyst"), 
-                      tags$li("Management Consultant"), 
-                      tags$li("Assistant Professor"), 
-                      tags$li("Attorney"), 
-                      tags$li("Teacher"),
-                      tags$mark(tags$i("* Please note that the data is from the United States Department of Labor, Employment & Training Administration and based on the prevailing wage data of foreign employers (The prevailing wage data of US natives are not included)")),
-                      tags$br()
+                    tags$span(
+                      "This app,",tags$strong("U.S. Salary Comparator,"), 
+                      "is the shiny dashboard application designed to explore and compare salary data among", tags$strong("8"), "professions, including:", style = "font-size:16px"),
+                    br(), br(),
+                    fluidRow(column(6, tags$li("Data Scientist"), tags$li("Software Engineer"), tags$li("Data Analyst"), tags$li("Business Analyst")), 
+                               column(6, tags$li("Management Consultant"), tags$li("Assistant Professor"), tags$li("Attorney"), tags$li("Teacher"))),
+                    br(),
+                    fluidRow(tags$mark(tags$i("* Please note that the data is from", tags$strong("the United States Department of Labor, Employment & Training Administration"), "and based on the prevailing wage data of", tags$strong("foreign"), "employers (the prevailing wage data of US natives are not included)"))
                     )
-                  ),
-                  br()
+                  )
                 )
               )
             ),
@@ -70,16 +65,13 @@ body <- dashboardBody(
                 status = "primary", width = 12, collapsible = TRUE,
                 column(12, 
                        tags$div(
-                         "This dataset is from the ",
-                         tags$span(
-                          tags$strong("United States Department of Labor, Employment & Training Administration. "), 
-                           "It is about the prevailing wage data of foriegn employers seeking to file applications in the Permanent Labor Certification Program (PERM), the H-1B, H-1B1, and E-3 Professional and Specialty Occupation Programs, and the H-2B Non-agricultural Temporary Labor Certification Program.",
-                          tags$li("Source: ",tags$a(href = "https://www.foreignlaborcert.doleta.gov/performancedata.cfm", "Foreign Labor Salary Data")),
-                          tags$li("The filtered data for this application contains total",tags$strong("167,278"), "cases (in ", tags$strong("19"), "columns) in 2015"),
-                          br()
+                          tags$span("This dataset is about the prevailing wage data of foriegn employers seeking to file applications in the Permanent Labor Certification Program (PERM), 
+                                    the H-1B, H-1B1, and E-3 Professional and Specialty Occupation Programs, and the H-2B Non-agricultural Temporary Labor Certification Program."),
+                          br(), br(),
+                          tags$li(tags$strong("Source: "),tags$a(href = "https://www.foreignlaborcert.doleta.gov/performancedata.cfm", "Foreign Labor Salary Data")),
+                          tags$li("The filtered dataset for this application contains total",tags$strong("167,278"), "cases (in ", tags$strong("19"), "columns) in 2015.")
                          )
                        )
-                )
               )
             ),
             fluidRow(
@@ -88,12 +80,18 @@ body <- dashboardBody(
                 status = "info", width = 12, collapsible = TRUE,
                 column(12, 
                        tags$div(
-                         "We are ",
-                         tags$span(
-                           tags$strong("Zixiao Kang, Doudou Zhang, Huisi Luo, Weijia Zhao,"), 
-                           "who are currently Business Analytics master students at Carey Business School, Johns Hopkins University.")  
+                         fluidRow(
+                           column(4, tags$img(src="carey.jpg", height=120, width=300)),
+                           column(8, tags$div("Team members are all from MSBA program at Carey Business School, Johns Hopkins University:", style = "font-size:16px"),
+                                  br(),
+                                  tags$li(tags$strong("Zixiao Kang:"), "He's a game data analyst, and a big fan of Hold'em Poker."),
+                                  tags$li(tags$strong("Doudou Zhang:"), "She's also a data analyst, who owns a very cute doggy."), 
+                                  tags$li(tags$strong("Huisi Luo:"), "She doesn't have a lot of habits, except eating chicken."), 
+                                  tags$li(tags$strong("Weijia Zhao:"), "She's on the way to be a operation manager with a data brain.")
+                           )
+                         )
                        ),
-                       tags$img(src="carey.jpg", height=100, width=300),
+                       br(),
                        tags$li("If you have any suggestion, question, or review for this app, comments are open! 
                        Please send an email to ", tags$a(href = "mailto: conradkang@jhu.edu", "conradkang@jhu.edu"), "and refer to this Shiny app.")
                 )
@@ -107,8 +105,8 @@ body <- dashboardBody(
             fluidRow(
               box(
                 title = "How to Use", solidHeader = TRUE,
-                status="warning", width=12, collapsible = TRUE, collapsed = TRUE,
-                h4("* Please be patient that it usually takes 10 seconds to load the scatter plot"),
+                status = "warning", width = 12, collapsible = TRUE, collapsed = TRUE,
+                h4("* Please be patient that it usually takes 10 seconds to load the scatter plot with data points"),
                 h5("This 'Salary Scatter Plot' panel shows the salary distribution by 8 different jobs. It comprises of three sections: an option input section, a plot area section, and an aggreate summary box section.")
               )
             ),
@@ -133,10 +131,11 @@ body <- dashboardBody(
                      sliderInput("sliderForSalaryRangeForScatterPlot", "Salary Range:", 
                                  min = 0, max = 400000, value = c(40000, 200000), step = 5000)
                      ),
-              column(4, checkboxInput("checkboxForShowDataPoint", label = "Show data points", value = TRUE))
+              column(1, " "),
+              column(3, br(), checkboxInput("checkboxForShowDataPoint", label = "Show data points"))
             ),
             br(),
-            fluidRow(plotOutput("myQScatterChart")),
+            fluidRow(column(12, plotOutput("myQScatterChart"))),
             br(),
             fluidRow(
               valueBoxOutput("minBoxInScatterSummary"),
@@ -160,7 +159,7 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              column(6, 
+              column(3, 
                      selectizeInput('singleSelectForJobTitleForComparison1', 'Choose the 1st Job Title:', 
                                     c("Choose one"= '', "Data Scientist" = "data scientist", "Software Engineer" = "software engineer", 
                                       "Data Analyst" = "data analyst", "Business Analyst" = "business analyst", "Assistant Professor" = "assistant professor", 
@@ -168,36 +167,45 @@ body <- dashboardBody(
                                     ),
                                     multiple = FALSE
                      )),
-              column(6, 
+              column(3,
+                     radioButtons("mapvalue1", "Map Value:",
+                                  c("Salary" = "AVG_SALARY",
+                                    "Headcount" = "JOBS"), inline = T)
+                     ),
+              column(3, 
                      selectizeInput('singleSelectForJobTitleForComparison2', 'Choose the 2nd Job Title:', 
                                     c("Choose one"= '', "Data Scientist" = "data scientist", "Software Engineer" = "software engineer", 
                                       "Data Analyst" = "data analyst", "Business Analyst" = "business analyst", "Assistant Professor" = "assistant professor", 
                                       "Management Consultant" = "management consultant", "Attorney" = "attorney", "Teacher" = "teacher"
                                     ),
                                     multiple = FALSE
-                     ))
+                     )),
+              column(3,
+                     radioButtons("mapvalue2", "Map Value:",
+                                  c("Salary" = "AVG_SALARY",
+                                    "Headcount" = "JOBS"), inline = T)
+              )
             ),
             fluidRow(
               box(
-                title = "Map 1", solidHeader = TRUE,
+                title = "Salary Map for 1st Job", solidHeader = TRUE,
                 collapsible = TRUE, 
-                htmlOutput("myGvisMap1") 
-                
+                htmlOutput("myGvisMap1")
               ),
               box(
-                title = "Map 2", solidHeader = TRUE,
+                title = "Salary Map for 2nd Job", solidHeader = TRUE,
                 collapsible = TRUE,
                 htmlOutput("myGvisMap2") 
               )
             ),
             fluidRow(
               box(
-                title = "DataTable for Map 1", solidHeader = TRUE,
+                title = "Data Table for 1st Job", solidHeader = TRUE,
                 collapsible = TRUE,
                 DT::dataTableOutput("myComparisonTableByJobTitle1")
               ),
               box(
-                title = "DataTable for Map 2", solidHeader = TRUE,
+                title = "Data Table for 2nd Job", solidHeader = TRUE,
                 collapsible = TRUE,
                 DT::dataTableOutput("myComparisonTableByJobTitle2")
               )
@@ -215,19 +223,16 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              column(3, checkboxInput("checkboxForDS", label = "Data Scientist", value = TRUE) ),
-              column(3, checkboxInput("checkboxForSW", label = "Software Engineer", value = TRUE)),
-              column(3, checkboxInput("checkboxForDA", label = "Data Analyst", value = TRUE)),
-              column(3, checkboxInput("checkboxForBA", label = "Business Analyst", value = TRUE))
-            ),
-            fluidRow(
-              column(3, checkboxInput("checkboxForAP", label = "Assistant Professor", value = TRUE)),
-              column(3, checkboxInput("checkboxForMC", label = "Management Consultant", value = TRUE)),
-              column(3, checkboxInput("checkboxForAT", label = "Attorney", value = TRUE)),
-              column(3, checkboxInput("checkboxForTC", label = "Teacher", value = TRUE))
-            ),
-            fluidRow(
-              column(6,
+              column(4,
+                     selectizeInput('multiSelectForJobTitles', 'Job Titles:', 
+                                    c("Choose multiple"= '', "Data Scientist" = "data scientist", "Software Engineer" = "software engineer", 
+                                      "Data Analyst" = "data analyst", "Business Analyst" = "business analyst", 
+                                      "Assistant Professor" = "assistant professor", "Management Consultant" = "management consultant",
+                                      "Attorney" = "attorney", "Teacher" = "teacher"),
+                                    multiple = TRUE
+                     )
+              ),
+              column(4,
                      selectizeInput('multiSelectForStates', 'States:', 
                                     c("Choose multiple"= '', "Alabama" = "AL", "Alaska" = "AK","Arizona" = "AZ", "Arkansas" = "AR", 
                                       "California" = "CA", "Colorado" = "CO", "Connecticut" = "CT", "Delaware" = "DE", "District of Columbia" = "DC", 
@@ -244,19 +249,18 @@ body <- dashboardBody(
                                     multiple = TRUE
                      )
               ),
-              column(6, 
-                     sliderInput("sliderForSalaryRange", "Salary Range:", 
-                                 min = 0, max = 400000, value = c(40000, 200000), step = 5000)
+              column(4, sliderInput("sliderForSalaryRange", "Salary Range:", 
+                                    min = 0, max = 400000, value = c(40000, 200000), step = 5000)
               )
-            ),
+              ),
             fluidRow(
-              column(5, textInput("searchInputForCity","City Search:","") ),
-              column(5, textInput("searchInputForEmployer","Employer Name Search:","")),
-              column(2, br(), downloadButton("downloadData", "Download"))
+              column(4, textInput("searchInputForCity","City Search:","") ),
+              column(4, textInput("searchInputForEmployer","Employer Name Search:","")),
+              column(4, br(), downloadButton("downloadData", "Download What You See"))
             ),
             br(),
             fluidRow(
-              DT::dataTableOutput("myTable")
+              column(12, DT::dataTableOutput("myTable"))
             )
     ),
     # 5th: Top Recruiters
@@ -270,7 +274,10 @@ body <- dashboardBody(
               )
             ),
             br(),
-            fluidRow(plotOutput("myRankingPlot")), 
+            fluidRow(
+              column(6, plotlyOutput("myRankingPlot1", height = "200px", inline = FALSE)),
+              column(6, plotlyOutput("myRankingPlot2", height = "200px", inline = FALSE))
+              ), 
             br(),
             fluidRow(
                 column(4, 
@@ -297,16 +304,15 @@ body <- dashboardBody(
                                         "Wyoming"),
                                       multiple = F)
                 ),
-                DT::dataTableOutput("myTableForOverallRank")
+                column(12, DT::dataTableOutput("myTableForOverallRank"))
               )
     )
   )
 )
 
-
 server <- function(input, output) { 
  
-  options("scipen"=10) 
+  options("scipen" = 10) 
   
   ##########################################################
   # Data manipulation (for Salary DataTable)
@@ -314,37 +320,20 @@ server <- function(input, output) {
   updateInputDataForDTable <- reactive({  
 
     dataFilteredForDTable <- salary_refined
-  
-    if(input$checkboxForDS != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "data scientist"),]        
-    } 
-    if(input$checkboxForSW != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "software engineer"),]        
-    } 
-    if(input$checkboxForDA != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "data analyst"),]        
-    } 
-    if(input$checkboxForBA != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "business analyst"),]        
-    } 
-    if(input$checkboxForAP != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "assistant professor"),]        
-    } 
-    if(input$checkboxForMC != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "management consultant"),]        
-    } 
-    if(input$checkboxForAT != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "attorney"),]        
-    } 
-    if(input$checkboxForTC != T){
-      dataFilteredForDTable <- dataFilteredForDTable[(dataFilteredForDTable$JOB_TITLE_SUBGROUP != "teacher"),]        
-    } 
+    
+    #////////////////////////////////////////////////////////////////////////////////
+    # Filter by Job Titles
+    #////////////////////////////////////////////////////////////////////////////////
+    if(!is.null(input$multiSelectForJobTitles)){
+      targetJobTitles <- unlist(input$multiSelectForJobTitles)
+      dataFilteredForDTable <- dataFilteredForDTable %>% filter(JOB_TITLE_SUBGROUP %in% targetJobTitles)
+    }
     
     #////////////////////////////////////////////////////////////////////////////////
     # Filter by States (with Multiple Selectize)
     # (AND operations. --> Ex) find 'business' in CA and GA having avg.ratings of 3.5)
     #////////////////////////////////////////////////////////////////////////////////
-    if(!is.null(input$multiSelectForStates) ){
+    if(!is.null(input$multiSelectForStates)){
       targetStates <- unlist(strsplit(input$multiSelectForStates," "))
       dataFilteredForDTable <- dataFilteredForDTable %>% filter(WORK_STATE_ABBREVIATION %in% targetStates)
     }
@@ -364,11 +353,9 @@ server <- function(input, output) {
       dataFilteredForDTable <- dataFilteredForDTable %>% 
         filter(grepl(input$searchInputForEmployer, dataFilteredForDTable$EMPLOYER_NAME, ignore.case = TRUE)) 
     }
-    
-    
+
     dataFilteredForDTable
   })
-  
   
   ##########################################################
   # Data manipulation (for Salary Scatter Plot)
@@ -382,16 +369,6 @@ server <- function(input, output) {
     if(input$singleSelectForStatesForScatterPlot != "All"){
       dataFilteredForScatterPlot <- dataFilteredForScatterPlot[(input$singleSelectForStatesForScatterPlot == dataFilteredForScatterPlot$WORK_STATE_ABBREVIATION),]
     }
-    
-    dataFilteredForScatterPlot <- dataFilteredForScatterPlot %>% mutate(JOB_GROUP_CODE = ifelse(JOB_TITLE_SUBGROUP == "assistant professor", 1,
-                                                        ifelse(JOB_TITLE_SUBGROUP == "attorney", 2,
-                                                               ifelse(JOB_TITLE_SUBGROUP == "business analyst", 3,
-                                                                      ifelse(JOB_TITLE_SUBGROUP == "data analyst", 4,
-                                                                             ifelse(JOB_TITLE_SUBGROUP == "data scientist", 5,
-                                                                                    ifelse(JOB_TITLE_SUBGROUP == "management consultant", 6,
-                                                                                           ifelse(JOB_TITLE_SUBGROUP == "software engineer", 7,
-                                                                                                  ifelse(JOB_TITLE_SUBGROUP == "teacher", 8)))))))))
-    
     
     manualQuartile <- function(x) {
       x <- sort(x)
@@ -455,7 +432,6 @@ server <- function(input, output) {
     dataFilteredForScatterPlot
   })
   
-  
   ##########################################################
   # Data manipulation (for Salary Comparison Maps)
   ###########################################################
@@ -492,7 +468,6 @@ server <- function(input, output) {
     dataFilteredForMapByJobTitle2
   })
 
-  
   ####################################################################################################################
   # Rendering Section
   #####################################################################################################################
@@ -534,30 +509,52 @@ server <- function(input, output) {
   #////////////////////////////////////////////////////////////////////////////////
   # googleVis Map 
   #////////////////////////////////////////////////////////////////////////////////
+  
   output$myGvisMap1 <- renderGvis({
     
-    mapData <- updateInputDataForMapByJobTitle1() # View(mapData)
-    gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="AVG_SALARY",
-                 options=list(region="US", displayMode="regions", resolution="provinces", 
-                              width="100%", #height=200, 
-                              colorAxis="{colors:['#43C6AC', '#191654']}",
-                              backgroundColor="gray"
-                 )
-    )
+    if(input$mapvalue1 == "AVG_SALARY"){
+      mapData <- updateInputDataForMapByJobTitle1() # View(mapData)
+      gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="AVG_SALARY",
+                   options=list(region="US", displayMode="regions", resolution="provinces", 
+                                width="100%",
+                                colorAxis="{colors:['#43C6AC', '#191654']}",
+                                backgroundColor="gray"
+                   )
+      )
+    } else {
+      mapData <- updateInputDataForMapByJobTitle1() # View(mapData)
+      gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="NUM_POS",
+                   options=list(region="US", displayMode="regions", resolution="provinces", 
+                                width="100%",
+                                colorAxis="{colors:['#F0F2F0', '#000C40']}",
+                                backgroundColor="gray"
+                   )
+      )
+    }
   })  
   
   output$myGvisMap2 <- renderGvis({
     
-    mapData <- updateInputDataForMapByJobTitle2() # View(mapData)
-    gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="AVG_SALARY",
-                 options=list(region="US", displayMode="regions", resolution="provinces", 
-                              width="100%",
-                              colorAxis="{colors:['#F0F2F0', '#000C40']}",
-                              backgroundColor="gray"
-                 )
-    )
+    if(input$mapvalue2 == "AVG_SALARY"){
+      mapData <- updateInputDataForMapByJobTitle2() # View(mapData)
+      gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="AVG_SALARY",
+                   options=list(region="US", displayMode="regions", resolution="provinces", 
+                                width="100%",
+                                colorAxis="{colors:['#43C6AC', '#191654']}",
+                                backgroundColor="gray"
+                   )
+      )
+    } else {
+      mapData <- updateInputDataForMapByJobTitle2() # View(mapData)
+      gvisGeoChart(mapData, locationvar= "WORK_STATE", colorvar="NUM_POS",
+                   options=list(region="US", displayMode="regions", resolution="provinces", 
+                                width="100%",
+                                colorAxis="{colors:['#F0F2F0', '#000C40']}",
+                                backgroundColor="gray"
+                   )
+      )
+    }
   })  
-  
   
   #////////////////////////////////////////////////////////////////////////////////
   # DataTables for googleVis Map 
@@ -602,8 +599,7 @@ server <- function(input, output) {
       "$(this.api().table().header()).css({'background-color': '#cce6ff', 'color': '#2a4e6c'});",
       "}")
   )) %>% formatCurrency(c('AVG_SALARY'), "$") ) 
-  
-  
+
   #////////////////////////////////////////////////////////////////////////////////
   # ScatterPlot (ggplot)
   #////////////////////////////////////////////////////////////////////////////////
@@ -616,21 +612,22 @@ server <- function(input, output) {
         geom_boxplot() +
         ggtitle("Salary VS. Jobs") +
         geom_jitter(position=position_jitter(width=.9), size=1, alpha=.3) +
-        theme(legend.position="bottom", legend.title = element_blank(), plot.title = element_text(size=18, face="bold", hjust = 0.5), axis.text = element_text(size = 12), axis.title=element_text(size=15)) +
+        theme(legend.position="none", plot.title = element_text(size = 18, face="bold", hjust = 0.5), axis.text = element_text(size = 15), axis.title = element_text(size = 15)) +
         xlab("Job Title") +
         ylab("Paid Wage Per Year ($ K)") +
-        labs(fill = "")
+        labs(fill = "") +
+        coord_flip()
     } else {
       ggplot(data = dataForScatterPlot, aes(x = JOB_TITLE_SUBGROUP, y = PAID_WAGE_PER_YEAR/1000, color = JOB_TITLE_SUBGROUP)) +
         geom_boxplot() +
         ggtitle("Salary VS. Jobs") +
-        theme(legend.position="bottom", legend.title = element_blank(), plot.title = element_text(size=15, face="bold", hjust = 0.5), axis.text = element_text(size = 12), axis.title=element_text(size=15)) +
+        theme(legend.position="none", plot.title = element_text(size = 18, face="bold", hjust = 0.5), axis.text = element_text(size = 15), axis.title = element_text(size = 15)) +
         xlab("Job Title") +
         ylab("Paid Wage Per Year ($ K)") +
-        labs(fill = "")
+        labs(fill = "") +
+        coord_flip()
     }
   })
-  
   
   ###########################################################
   # DataTables for Overall Recruitment Ranking
@@ -655,7 +652,7 @@ server <- function(input, output) {
   
   output$myTableForOverallRank <- DT::renderDataTable(DT::datatable({ 
     
-    dataForDTableOverall <- updateInputDataForDTableOR()
+    dataForDTableOverall <- updateInputDataForDTableOR() %>% filter(JOBS >= 5)
     dataForDTableOverall <- dataForDTableOverall %>% arrange(desc(JOBS))
     dataForDTableOverall
     
@@ -673,21 +670,38 @@ server <- function(input, output) {
     )) %>% formatCurrency(c('AVG', 'MIN', 'Q1', 'Median', 'Q3', 'MAX'), "$") 
   ) 
   
-  output$myRankingPlot <- renderPlot({
-    dataForDTableOverall <- updateInputDataForDTableOR()
+  output$myRankingPlot1 <- renderPlotly({
+    dataForDTableOverall <- updateInputDataForDTableOR() %>% filter(JOBS >= 5)
     
-    dataForDTableOverallPlot <- dataForDTableOverall
+    dataForDTableOverallPlot <- dataForDTableOverall %>% arrange(desc(Median))
     
-    ggplot(data = dataForDTableOverallPlot[1:10,], aes(x = reorder(EMPLOYER_NAME, Median), y = Median/1000, fill = EMPLOYER_NAME)) +
-      geom_col(alpha = 0.7) +
-      ggtitle("Top 10 Companies") +
+    p1 <- ggplot(data = dataForDTableOverallPlot[1:5,], aes(x = reorder(EMPLOYER_NAME, Median), y = Median/1000, text = sprintf("Company: %s <br> Median: %s K", EMPLOYER_NAME, round(Median/1000,2)))) +
+      geom_col(alpha = 0.7, fill = "#FA5858") +
+      ggtitle("Top 5 Companies in Salary") +
       xlab("Company Name") +
       ylab("Median Wage ($ K)") +
-      theme(legend.position="none", plot.title = element_text(size=15, face="bold", hjust = 0.5), axis.text.x = element_text(size = 12), axis.title=element_text(size=15)) +
+      theme(legend.position="none") +
       coord_flip()
+    
+    ggplotly(p1, tooltip = "text")
+  })
+  
+  output$myRankingPlot2 <- renderPlotly({
+    dataForDTableOverall <- updateInputDataForDTableOR() %>% filter(JOBS >= 5)
+    
+    dataForDTableOverallPlot <- dataForDTableOverall %>% arrange(desc(JOBS))
+    
+    p2 <- ggplot(data = dataForDTableOverallPlot[1:5,], aes(x = reorder(EMPLOYER_NAME, JOBS), y = JOBS, text = sprintf("Company: %s <br> Headcount: %s", EMPLOYER_NAME, JOBS))) +
+      geom_col(alpha = 0.7, fill = "#5882FA") +
+      ggtitle("Top 5 Companies in Headcount") +
+      xlab("Company Name") +
+      ylab("Job Headcount") +
+      theme(legend.position="none") +
+      coord_flip()
+    
+    ggplotly(p2, tooltip = "text")
   })
 }
-
 
 ##########################################################
 # ShinyApp main function
